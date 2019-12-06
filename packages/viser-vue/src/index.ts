@@ -134,7 +134,7 @@ const baseChartComponent = {
         Object.keys(existProps).forEach(propsKey => {
           const lowerCasePropsKey = propsKey.toLowerCase();
           if (regSeries.indexOf(lowerCasePropsKey) > -1) {
-            safePush(d2Json, 'series', {
+            safePushSeries(d2Json, 'series', {
               quickType: propsKey,
               ...normalizeProps(existProps, seriesProps),
             });
@@ -248,9 +248,10 @@ const baseChartComponent = {
         if (isAllUndefined(this._props)) {
           nearestRootComponent.jsonForD2[rechartName] = true;
         } else if (regSeries.indexOf(rechartName) > -1) {
-          safePush(nearestRootComponent.jsonForD2, 'series', {
+          safePushSeries(nearestRootComponent.jsonForD2, 'series', {
             quickType: rechartNameCamelCase,
             ...cleanUndefined(normalizeProps(this._props)),
+            componentId: this._uid,
           });
         } else {
           oneObjectMoreArray(nearestRootComponent.jsonForD2, rechartName, {
@@ -350,14 +351,36 @@ export default {
   },
 };
 
-function safePush(obj: any, key: string, value: any) {
+function safePushSeries (obj: any, key: string, value: any) {
   if (!obj[key]) {
-    obj[key] = [];
+    obj[key] = [value]
+    return;
   }
 
-  cleanUndefined(value);
+  cleanUndefined(value)
 
-  obj[key].push(value);
+  let indexOfSameObject = -1
+  if (value && value.componentId) {
+    obj[key].forEach((o: any, i: number) => {
+      if (o && o.componentId && o.componentId === value.componentId) {
+        indexOfSameObject = i;
+      }
+    })
+  } else if (value && value.quickType) {
+    obj[key].forEach((o: any, i: number) => {
+      if (o && o.quickType && o.quickType === value.quickType) {
+        indexOfSameObject = i;
+      }
+    })
+  }
+  if (indexOfSameObject === -1) {
+    obj[key].push(value)
+  } else {
+    obj[key][indexOfSameObject] = {
+      ...obj[key][indexOfSameObject],
+      ...value
+    }
+  }
 }
 
 function oneObjectMoreArray(obj: any, key: string, value: any) {
