@@ -255,9 +255,7 @@ export const process = (chart: any, config: IMainConfig, isUpdate: boolean = fal
   arrSeries = _.sortBy(arrSeries, 'zIndex');
   let chartInstance;
   arrSeries.forEach((currSeries: any) => {
-    if (!isUpdate) {
-      EventUtils.setEvent(chart, currSeries.gemo, currSeries);
-    }
+    EventUtils.setEvent(chart, currSeries.gemo, currSeries);
     for (const item in currSeries) {
       if (currSeries.hasOwnProperty(item)) {
         EventUtils.setSEvent(chart, 'label', name, currSeries[item]);
